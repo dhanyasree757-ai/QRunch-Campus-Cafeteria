@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QRunch | Hungry? QRunch It!</title>
+<style>
+:root{--orange:#ef6b16;--deep:#d94b12;--cream:#fff9ee;--ink:#211d1b;--muted:#6e6259;--green:#16864c;--line:#f1dfca}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;overflow-x:hidden}
+header{height:82px;display:flex;align-items:center;justify-content:space-between;max-width:1180px;margin:auto;padding:0 28px}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;font-weight:900;font-size:24px}.brand img{width:72px;height:62px;object-fit:contain;mix-blend-mode:multiply}.brand span{color:var(--orange)}nav{display:flex;align-items:center;gap:28px}nav a{color:var(--ink);text-decoration:none;font-weight:600;font-size:14px}.btn{border:0;border-radius:14px;padding:14px 24px;font-size:16px;font-weight:750;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s}.btn-primary{background:var(--orange);color:white;box-shadow:0 7px 18px #ef6b1629}.btn-primary:hover{background:var(--deep);transform:translateY(-1px)}.btn-outline{background:white;color:var(--deep);border:1px solid #f2c59d}.hero{max-width:1180px;margin:24px auto 0;padding:32px 28px 60px;min-height:580px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:35px;position:relative}.hero:before{content:"";position:absolute;width:450px;height:450px;background:#ffedcf;border-radius:50%;right:40px;top:60px;z-index:0}.hero-copy{position:relative;z-index:1;padding-top:4px}.hero-brand{display:block;width:245px;height:190px;object-fit:contain;object-position:left center;margin:-8px 0 -2px -6px;mix-blend-mode:multiply}.mood-note{position:absolute;right:2px;top:105px;z-index:2;font-size:17px;font-weight:900;line-height:1.35;transform:rotate(-12deg);color:#211d1b;max-width:80px}.mood-note:after{content:"✦";display:block;color:var(--orange);font-size:26px;text-align:right}.eyebrow{display:inline-block;background:#fff0d9;color:#b94b10;padding:9px 14px;border-radius:99px;font-weight:800;font-size:13px;letter-spacing:.3px}.hero h1{font-size:clamp(42px,5vw,66px);line-height:1.04;letter-spacing:-2px;margin:22px 0 18px;max-width:570px}.hero h1 span{color:var(--orange)}.hero p{font-size:18px;line-height:1.65;color:var(--muted);max-width:520px;margin:0 0 26px}.actions{display:flex;gap:12px;flex-wrap:wrap}.hero-art{position:relative;z-index:1;display:flex;justify-content:center;align-items:center}.hero-art img{width:min(112%,560px);max-height:520px;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 18px 25px #b76b2720);border-radius:30px}.hero{max-width:1180px;margin:0 auto;padding:8px 28px 36px;min-height:590px;grid-template-columns:.95fr 1.05fr;gap:16px}.hero h1{font-size:clamp(32px,3.1vw,46px);line-height:1.12;letter-spacing:-1.4px;margin:6px 0 12px;max-width:460px}.hero p{font-size:15px;line-height:1.55;max-width:420px;margin-bottom:22px}.eyebrow{display:none}.hero:before{width:420px;height:420px;right:4px;top:100px;background:#ffe6b5}.features{max-width:1120px;margin:0 auto 60px;padding:0 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.feature{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 7px 25px #6b3c1010}.feature .emoji{font-size:28px}.feature h3{margin:12px 0 8px}.feature p{color:var(--muted);line-height:1.5;margin:0;font-size:14px}footer{text-align:center;color:#8c7b6e;padding:24px;border-top:1px solid #f1e4d5;font-size:13px}
+.modal-backdrop{position:fixed;inset:0;background:#21170fcc;display:none;align-items:center;justify-content:center;padding:20px;z-index:5}.modal-backdrop.open{display:flex}.modal{width:min(600px,100%);background:#fffdf8;border-radius:26px;padding:30px;box-shadow:0 25px 90px #0004;text-align:center;position:relative}.modal-logo{width:125px;height:105px;object-fit:contain;mix-blend-mode:multiply}.modal h2{font-size:30px;margin:6px 0 8px}.modal>p{color:var(--muted);margin:0 0 24px}.roles{display:grid;grid-template-columns:1fr 1fr;gap:16px}.role{border:1px solid #f5d7b5;border-radius:18px;padding:22px 16px;background:#fff4e4}.role.vendor{background:#eaf8ed;border-color:#c5e9cd}.role .role-icon{font-size:38px}.role h3{margin:10px 0 6px}.role p{font-size:13px;color:var(--muted);min-height:36px;line-height:1.4}.role .btn{width:100%;font-size:14px;padding:12px}.role.vendor .btn{background:var(--green);color:white}.close{position:absolute;right:17px;top:14px;border:0;background:#f7eee4;border-radius:50%;width:36px;height:36px;font-size:22px;cursor:pointer;color:#58483c}.modal-note{font-size:12px;color:#87776a;margin-top:18px}
+@media(max-width:760px){.hero{grid-template-columns:1fr;padding:22px 22px 30px;text-align:left;min-height:0}.hero-brand{width:205px;height:155px;margin:0 auto 4px}.hero h1{font-size:34px}.hero-art{margin-top:0}.mood-note{right:8px;top:15px;font-size:14px}.hero:before{width:280px;height:280px;right:calc(50% - 140px);top:auto;bottom:0}header{height:72px;padding:0 18px}.brand img{width:58px;height:52px}nav{gap:12px}nav a:not(.btn){display:none}nav .btn{padding:11px 16px}.hero{grid-template-columns:1fr;padding:26px 22px 38px;margin-top:0;text-align:center;gap:10px}.hero h1{letter-spacing:-1.2px}.hero p{font-size:16px;margin-left:auto;margin-right:auto}.actions{justify-content:center}.hero:before{width:300px;height:300px;right:calc(50% - 150px);top:auto;bottom:20px}.hero-art img{max-height:320px;width:min(100%,360px)}.features{grid-template-columns:1fr;padding:0 22px}.roles{grid-template-columns:1fr}.role p{min-height:0}.modal{padding:24px 18px}.modal h2{font-size:26px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/" aria-label="QRunch home"><img src="/qrunch-logo.png" alt="QRunch logo"><span>QRunch</span></a>
+  <nav><a href="#features">About</a><button class="btn btn-outline" onclick="openRoles('register')">Create Account</button><button class="btn btn-primary" onclick="openRoles('login')">Login</button></nav>
+</header>
+<main>
+<section class="hero">
+  <div class="hero-copy">
+    <img class="hero-brand" src="/qrunch-logo.png" alt="QRunch mascot logo">
+    <h1>Smart Ordering. Quick Pickup.<br>Better Campus Life.</h1>
+    <p>Pre-order your favorite meals, scan the QR code, and pick up with ease!</p>
+    <div class="actions"><button class="btn btn-primary" onclick="openRoles('login')">♟ &nbsp; Login</button></div>
+  </div>
+  <div class="hero-art"><span class="mood-note">Good<br>Food<br>Good<br>Mood</span><img src="/hero-food.png" alt="Fresh campus meal bowl"></div>
+</section>
+<section class="features" id="features">
+  <article class="feature"><div class="emoji">🍔</div><h3>Order with ease</h3><p>Explore cafeteria favorites and place your order in a few clicks.</p></article>
+  <article class="feature"><div class="emoji">📱</div><h3>QR quick pickup</h3><p>Get a pickup code with your order and spend less time waiting.</p></article>
+  <article class="feature"><div class="emoji">⚡</div><h3>Stay in the loop</h3><p>Follow your order as the cafeteria prepares it for collection.</p></article>
+</section>
+</main>
+<footer>© QRunch · Made for a better campus food experience</footer>
+<div class="modal-backdrop" id="roleModal" role="dialog" aria-modal="true" aria-labelledby="roleTitle" onclick="if(event.target===this)closeRoles()">
+  <div class="modal"><button class="close" aria-label="Close" onclick="closeRoles()">×</button><img class="modal-logo" src="/qrunch-logo.png" alt="QRunch logo"><h2 id="roleTitle">Who are you?</h2><p id="roleSubtitle">Please select your role to continue.</p>
+    <div class="roles">
+      <article class="role"><div class="role-icon">🎓</div><h3>Customer</h3><p>Order your favorite meals and track your orders.</p><button class="btn btn-primary" onclick="goPortal('customer')">Continue →</button></article>
+      <article class="role vendor"><div class="role-icon">🏪</div><h3>Vendor</h3><p>Manage orders and update food status.</p><button class="btn" onclick="goPortal('vendor')">Continue →</button></article>
+    </div><div class="modal-note" id="modalNote">Choose the portal that matches your role.</div>
+  </div>
+</div>
+<script>
+let selectedAction='login';
+function openRoles(action){selectedAction=action;document.getElementById('roleTitle').textContent=action==='register'?'Join QRunch!':'Who are you?';document.getElementById('roleSubtitle').textContent=action==='register'?'Choose your account type to continue.':'Please select your role to continue.';document.getElementById('modalNote').textContent=action==='register'?'Choose Customer or Vendor to create your new account.':'Choose the portal that matches your role.';document.getElementById('roleModal').classList.add('open');document.body.style.overflow='hidden'}
+function closeRoles(){document.getElementById('roleModal').classList.remove('open');document.body.style.overflow=''}
+function goPortal(role){location.href='/auth.html?role='+(role==='vendor'?'vendor':'student')+'&action='+selectedAction}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRoles()});
+</script>
+</body></html>

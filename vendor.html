@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QRunch | Vendor Dashboard</title>
+  <link rel="stylesheet" href="vendor.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>🍔 QRunch</h2><p class="muted">VENDOR PORTAL</p>
+    <a class="nav active" href="#dashboard">▦ Dashboard</a>
+    <a class="nav" href="#orders">☷ Orders</a>
+    <a class="nav" href="#pickup">▣ Pickup verification</a>
+    <div class="sidebar-bottom">Campus Cafeteria</div>
+  </aside>
+  <main id="dashboard">
+    <header class="topbar"><div><h1>Order Dashboard</h1><p class="muted">Manage orders and student pickups.</p></div><span class="open-label">● Accepting orders</span></header>
+    <section class="stats" aria-label="Order summary">
+      <article class="stat"><span>New</span><strong id="newCount">0</strong></article>
+      <article class="stat"><span>Preparing</span><strong id="preparingCount">0</strong></article>
+      <article class="stat"><span>Ready</span><strong id="readyCount">0</strong></article>
+      <article class="stat"><span>Collected</span><strong id="collectedCount">0</strong></article>
+    </section>
+    <section class="panel" id="orders">
+      <div class="panel-heading"><div><h2>Orders</h2><p class="muted">Find and update student orders.</p></div><button class="secondary" id="resetButton">Reset demo</button></div>
+      <div class="toolbar"><input id="search" type="search" placeholder="Search order, student or pickup code..." aria-label="Search orders"><select id="sort" aria-label="Sort orders"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div>
+      <div class="filters" id="filters" aria-label="Filter by status"><button class="filter active" data-status="All">All</button><button class="filter" data-status="New">New</button><button class="filter" data-status="Preparing">Preparing</button><button class="filter" data-status="Ready">Ready</button><button class="filter" data-status="Collected">Collected</button><button class="filter" data-status="Cancelled">Cancelled</button></div>
+      <p id="resultCount" class="muted" aria-live="polite"></p><div id="orderList" class="order-list"></div>
+    </section>
+    <section class="panel" id="pickup"><h2>Pickup verification</h2><p class="muted">Enter the student's code before handing over an order.</p><form id="pickupForm" class="toolbar"><input id="pickupCode" inputmode="numeric" placeholder="Enter 4-digit pickup code" required><button type="submit">Verify code</button></form><p id="pickupMessage" role="status" aria-live="polite"></p></section>
+    <footer class="muted">QRunch demo · Sample orders only · No real student data</footer>
+  </main>
+  <script src="/common.js"></script>
+  <script src="vendor.js"></script>
+</body>
+</html>

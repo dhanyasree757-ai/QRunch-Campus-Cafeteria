@@ -1,0 +1,214 @@
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const Database = require('better-sqlite3');
+const path = require('path');
+const crypto = require('crypto');
+
+const app = express();
+const PORT = Number(process.env.PORT || 3000);
+const JWT_SECRET = process.env.JWT_SECRET || 'DEV_ONLY_change_this_secret_before_deploying';
+const db = new Database(path.join(__dirname, 'qrunch.sqlite'));
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
+app.use(cors());
+app.use(express.json({ limit: '100kb' }));
+
+// Small, persistent SQLite schema suitable for a student project prototype.
+db.exec(`
+CREATE TABLE IF NOT EXISTS users (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ name TEXT NOT NULL,
+ email TEXT NOT NULL UNIQUE,
+ password_hash TEXT NOT NULL,
+ role TEXT NOT NULL CHECK(role IN ('student','vendor')),
+ student_id TEXT,
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS menu_items (
+ id INTEGER PRIMARY KEY,
+ name TEXT NOT NULL,
+ category TEXT NOT NULL,
+ description TEXT NOT NULL,
+ price INTEGER NOT NULL CHECK(price >= 0),
+ emoji TEXT NOT NULL DEFAULT '🍽️',
+ badge TEXT NOT NULL DEFAULT 'POPULAR',
+ available INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS orders (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ public_id TEXT NOT NULL UNIQUE,
+ student_user_id INTEGER REFERENCES users(id),
+ student_name TEXT NOT NULL,
+ student_id TEXT,
+ status TEXT NOT NULL DEFAULT 'New' CHECK(status IN ('New','Preparing','Ready','Collected','Rejected','Cancelled')),
+ pickup_code TEXT NOT NULL UNIQUE,
+ pickup_time TEXT NOT NULL,
+ total INTEGER NOT NULL CHECK(total >= 0),
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS order_items (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+ menu_item_id INTEGER NOT NULL REFERENCES menu_items(id),
+ item_name TEXT NOT NULL,
+ unit_price INTEGER NOT NULL,
+ quantity INTEGER NOT NULL CHECK(quantity > 0)
+);
+`);
+
+const menuSeed = [
+ [1,'Paneer Rice Bowl','Meals','Soft paneer, rice & a flavourful masala',85,'🍛','STUDENT FAV'],
+ [2,'Veg Cheese Sandwich','Snacks','Toasted bread, veggies & melted cheese',55,'🥪','BESTSELLER'],
+ [3,'Cold Coffee','Drinks','Chilled, creamy and just the right kick',40,'🥤','CHILL PICK'],
+ [4,'Masala Dosa','Meals','Crispy dosa served with chutney',60,'🥞','POPULAR'],
+ [5,'Fresh Fruit Bowl','Healthy','A refreshing mix of seasonal fruits',50,'🥗','FRESH'],
+ [6,'Samosa Duo','Snacks','Two crispy, spicy potato samosas',25,'🥟','QUICK BITE'],
+ [7,'Lemon Mint Cooler','Drinks','Fresh lemon with a minty twist',30,'🍹','REFRESHING'],
+ [8,'Veg Fried Rice','Meals','Wok-tossed rice with crunchy vegetables',75,'🍚','CHEF PICK'],
+ [9,'Veg Burger','Snacks','Fresh veggies, special sauce',60,'🍔','POPULAR'],
+ [10,'Chicken Burger','Snacks','Juicy burger with signature sauce',80,'🍔','BESTSELLER'],
+ [11,'French Fries','Snacks','Crispy and golden fries',40,'🍟','QUICK BITE'],
+ [12,'Pizza','Meals','Loaded with veggies and cheese',120,'🍕','POPULAR'],
+ [13,'Chocolate Pancakes','Desserts','Fluffy pancakes with chocolate drizzle',70,'🥞','SWEET PICK'],
+ [14,'Mango Smoothie','Drinks','Cool mango smoothie',45,'🥭','FRESH'],
+ [15,'Idli Sambar','Meals','Soft idlis with warm sambar',45,'🍘','CLASSIC'],
+ [16,'Veg Wrap','Healthy','Crunchy vegetables in a soft wrap',65,'🌯','FRESH']
+];
+const insertMenu = db.prepare('INSERT OR IGNORE INTO menu_items (id,name,category,description,price,emoji,badge) VALUES (?,?,?,?,?,?,?)');
+menuSeed.forEach(item => insertMenu.run(...item));
+
+function ensureDemoUser(name, email, password, role) {
+ const existing = db.prepare('SELECT id FROM users WHERE email=?').get(email);
+ if (!existing) db.prepare('INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,?)').run(name,email,bcrypt.hashSync(password,10),role);
+}
+ensureDemoUser('QRunch Student','student@qrunch.local','Student123!','student');
+ensureDemoUser('QRunch Vendor','vendor@qrunch.local','Vendor123!','vendor');
+
+function auth(requiredRole) {
+ return (req,res,next) => {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  if (!token) return res.status(401).json({ error:'Sign in required.' });
+  try {
+   req.user = jwt.verify(token, JWT_SECRET);
+   if (requiredRole && req.user.role !== requiredRole) return res.status(403).json({ error:'You do not have permission for this action.' });
+   next();
+  } catch { return res.status(401).json({ error:'Session expired or invalid. Please sign in again.' }); }
+ };
+}
+function makeToken(user) { return jwt.sign({ id:user.id, name:user.name, email:user.email, role:user.role }, JWT_SECRET, { expiresIn:'8h' }); }
+function formatOrder(id) {
+ const o = db.prepare('SELECT * FROM orders WHERE id=?').get(id);
+ if (!o) return null;
+ const items = db.prepare('SELECT menu_item_id AS id, item_name AS name, unit_price AS price, quantity AS qty FROM order_items WHERE order_id=?').all(id);
+ return { id:o.public_id, student:o.student_name, studentId:o.student_id, code:o.pickup_code, items, total:o.total, status:o.status, pickupTime:o.pickup_time, createdAt:o.created_at };
+}
+
+app.get('/api/health', (req,res) => res.json({ ok:true, service:'QRunch API', database:'SQLite' }));
+app.post('/api/auth/register', (req,res) => {
+ const { name, email, password, studentId } = req.body || {};
+ const role = req.body?.role === 'vendor' ? 'vendor' : 'student';
+ if (!name || !email || !password || String(name).trim().length > 60 || String(password).length < 8) return res.status(400).json({ error:'Name, valid email, and a password of at least 8 characters are required.' });
+ try {
+  const info = db.prepare('INSERT INTO users (name,email,password_hash,role,student_id) VALUES (?,?,?,?,?)').run(String(name).trim(),String(email).trim().toLowerCase(),bcrypt.hashSync(password,10),role,studentId ? String(studentId).slice(0,30) : null);
+  const user = db.prepare('SELECT id,name,email,role,student_id FROM users WHERE id=?').get(info.lastInsertRowid);
+  res.status(201).json({ token:makeToken(user), user });
+ } catch (e) { if (String(e.code).includes('SQLITE_CONSTRAINT')) return res.status(409).json({ error:'That email is already registered.' }); throw e; }
+});
+app.post('/api/auth/login', (req,res) => {
+ const { email, password } = req.body || {};
+ const user = db.prepare('SELECT * FROM users WHERE email=?').get(String(email || '').trim().toLowerCase());
+ if (!user || !bcrypt.compareSync(String(password || ''),user.password_hash)) return res.status(401).json({ error:'Email or password is incorrect.' });
+ res.json({ token:makeToken(user), user:{ id:user.id,name:user.name,email:user.email,role:user.role,studentId:user.student_id || null } });
+});
+app.get('/api/auth/me', auth(), (req,res) => res.json({ user:req.user }));
+
+app.get('/api/menu', (req,res) => {
+ const rows = db.prepare('SELECT id,name,category,description,price,emoji,badge,available FROM menu_items ORDER BY id').all();
+ res.json({ items:rows.map(x=>({...x,available:Boolean(x.available),rating:'4.8'})) });
+});
+app.patch('/api/menu/:id/availability', auth('vendor'), (req,res) => {
+ const available = req.body?.available;
+ if (typeof available !== 'boolean') return res.status(400).json({ error:'available must be true or false.' });
+ const result = db.prepare('UPDATE menu_items SET available=? WHERE id=?').run(available ? 1:0,Number(req.params.id));
+ if (!result.changes) return res.status(404).json({ error:'Menu item not found.' });
+ res.json({ ok:true });
+});
+
+app.post('/api/orders', auth('student'), (req,res) => {
+ const { items, pickupTime } = req.body || {};
+ if (!Array.isArray(items) || items.length < 1 || items.length > 30) return res.status(400).json({ error:'Add at least one menu item.' });
+ const aggregated = new Map();
+ for (const item of items) {
+  const id = Number(item.id), qty = Number(item.qty);
+  if (!Number.isInteger(id) || !Number.isInteger(qty) || qty < 1 || qty > 20) return res.status(400).json({ error:'Invalid item or quantity.' });
+  aggregated.set(id,(aggregated.get(id)||0)+qty);
+ }
+ const findItem = db.prepare('SELECT id,name,price,available FROM menu_items WHERE id=?');
+ const lines=[]; let total=0;
+ for (const [id,qty] of aggregated) {
+  const dish=findItem.get(id);
+  if (!dish || !dish.available) return res.status(400).json({ error:'One of the selected items is unavailable.' });
+  if (qty > 20) return res.status(400).json({ error:'Maximum quantity per dish is 20.' });
+  lines.push({ ...dish, qty }); total += dish.price*qty;
+ }
+ const publicId='QR-'+crypto.randomInt(100000,999999);
+ const pickupCode=String(crypto.randomInt(1000,10000));
+ const pickup=String(pickupTime || 'As soon as possible').slice(0,80);
+ const insertOrder=db.prepare('INSERT INTO orders (public_id,student_user_id,student_name,student_id,pickup_code,pickup_time,total) VALUES (?,?,?,?,?,?,?)');
+ const insertLine=db.prepare('INSERT INTO order_items (order_id,menu_item_id,item_name,unit_price,quantity) VALUES (?,?,?,?,?)');
+ const create=db.transaction(()=>{
+  const result=insertOrder.run(publicId,req.user.id,req.user.name,db.prepare('SELECT student_id FROM users WHERE id=?').get(req.user.id)?.student_id || null,pickupCode,pickup,total);
+  for (const line of lines) insertLine.run(result.lastInsertRowid,line.id,line.name,line.price,line.qty);
+  return result.lastInsertRowid;
+ });
+ const orderId=create(); res.status(201).json({ order:formatOrder(orderId) });
+});
+app.post('/api/orders/:publicId/cancel', auth('student'), (req,res) => {
+ const order=db.prepare('SELECT * FROM orders WHERE public_id=? AND student_user_id=?').get(req.params.publicId,req.user.id);
+ if (!order) return res.status(404).json({ error:'Order not found.' });
+ if (order.status !== 'New') return res.status(409).json({ error:'Only new orders can be cancelled. The kitchen may already be preparing it.' });
+ const ageSeconds=db.prepare("SELECT (julianday('now')-julianday(?))*86400 AS age").get(order.created_at).age;
+ if (ageSeconds > 600) return res.status(409).json({ error:'The 10-minute cancellation window has expired.' });
+ db.prepare("UPDATE orders SET status='Cancelled' WHERE id=? AND status='New'").run(order.id);
+ res.json({ order:formatOrder(order.id), message:'Order cancelled within the 10-minute window.' });
+});
+app.get('/api/orders/mine', auth('student'), (req,res) => {
+ const rows=db.prepare('SELECT id FROM orders WHERE student_user_id=? ORDER BY id DESC').all(req.user.id);
+ res.json({ orders:rows.map(o=>formatOrder(o.id)) });
+});
+app.get('/api/orders', auth('vendor'), (req,res) => {
+ const rows=db.prepare('SELECT id FROM orders ORDER BY id DESC').all();
+ res.json({ orders:rows.map(o=>formatOrder(o.id)) });
+});
+app.patch('/api/orders/:publicId/status', auth('vendor'), (req,res) => {
+ const next=String(req.body?.status || '');
+ const allowed={ New:['Preparing','Rejected'], Preparing:['Ready'], Ready:['Collected'] };
+ const order=db.prepare('SELECT * FROM orders WHERE public_id=?').get(req.params.publicId);
+ if (!order) return res.status(404).json({ error:'Order not found.' });
+ if (!(allowed[order.status] || []).includes(next)) return res.status(400).json({ error:`Cannot change status from ${order.status} to ${next}.` });
+ if (next==='Collected' && String(req.body?.pickupCode || '').trim() !== order.pickup_code) return res.status(400).json({ error:'Pickup code does not match. Order was not collected.' });
+ db.prepare('UPDATE orders SET status=? WHERE id=?').run(next,order.id);
+ res.json({ order:formatOrder(order.id) });
+});
+app.post('/api/pickup/verify', auth('vendor'), (req,res) => {
+ const code=String(req.body?.code || '').trim();
+ const order=db.prepare('SELECT id,status FROM orders WHERE pickup_code=?').get(code);
+ if (!order) return res.status(404).json({ error:'Pickup code not found.' });
+ if (order.status!=='Ready') return res.status(409).json({ error:`Order is ${order.status}. Only ready orders can be collected.` });
+ db.prepare("UPDATE orders SET status='Collected' WHERE id=?").run(order.id);
+ res.json({ order:formatOrder(order.id), message:'Pickup verified. Order marked collected.' });
+});
+
+app.use(express.static(path.join(__dirname,'public')));
+app.get('/common.js', (req,res) => res.sendFile(path.join(__dirname,'public/common.js')));
+app.get('/student', (req,res) => res.sendFile(path.join(__dirname,'public/student/student.html')));
+app.use('/student', express.static(path.join(__dirname,'public/student')));
+app.get('/vendor', (req,res) => res.sendFile(path.join(__dirname,'public/vendor/vendor.html')));
+app.use('/vendor', express.static(path.join(__dirname,'public/vendor')));
+app.get('/', (req,res) => res.sendFile(path.join(__dirname,'index.html')));
+app.get('/auth', (req,res) => res.sendFile(path.join(__dirname,'public/auth.html')));
+app.use((err,req,res,next)=>{ console.error(err); res.status(500).json({ error:'Unexpected server error.' }); });
+app.listen(PORT,()=>console.log(`QRunch server running at http://localhost:${PORT}`));
