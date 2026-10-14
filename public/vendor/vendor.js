@@ -1,3 +1,4 @@
+```javascript
 let orders = [];
 let activeStatus = 'All';
 
@@ -293,3 +294,4 @@ if (logoutButton) {
     `;
   }
 })();
+```
