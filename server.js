@@ -238,6 +238,7 @@ function getPickupSlots() {
 // ORDER FORMATTER
 // --------------------------------------------------
 
+
 function formatOrder(id) {
   const order = db.prepare(
     'SELECT * FROM orders WHERE id = ?'
@@ -603,7 +604,7 @@ app.post('/api/orders', auth('student'), (req, res) => {
     const orderId = createOrder.immediate();
 
     return res.status(201).json({
-      order: formatOrder(orderId)
+      order: orderId)
     });
   } catch (error) {
     if (error.statusCode === 409) {
