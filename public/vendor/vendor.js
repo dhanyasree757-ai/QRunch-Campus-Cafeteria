@@ -28,7 +28,7 @@ function renderOrders(){
 return `<article class="order">
   <div>
     <h3>${escapeHTML(o.id)}</h3>
-    <p>${escapeHTML(o.student)} · Pickup code: <strong>${escapeHTML(o.code)}</strong></p>
+    <p><strong>Pickup time:</strong> ${escapeHTML(o.pickupTime || 'Not available')}</p>
     <p><strong>Pickup Time:</strong> ${escapeHTML(pickupTime)}</p>
     <p>${items}</p>
     <p><strong>₹${o.total}</strong></p>
