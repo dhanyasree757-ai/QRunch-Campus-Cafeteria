@@ -1,20 +1,33 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QRunch | Customer Portal</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="student.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#home" aria-label="QRunch home"><span class="brand-mark">Q</span><span>QRunch<span class="brand-dot">.</span><small>Campus food, made easy</small></span></a>
-      <div class="campus-pill"><span class="campus-icon">⌂</span><span><b>Campus Cafeteria</b><small>Pickup counter · Main block</small></span><span class="green-dot"></span></div>
+      <a class="brand" href="#home" aria-label="QRunch home">
+        <span class="brand-mark">Q</span>
+        <span>QRunch<span class="brand-dot">.</span><small>Campus food, made easy</small></span>
+      </a>
+
+      <div class="campus-pill">
+        <span class="campus-icon">⌂</span>
+        <span><b>Campus Cafeteria</b><small>Pickup counter · Main block</small></span>
+        <span class="green-dot"></span>
+      </div>
+
       <p class="nav-label">MENU</p>
+
       <nav class="nav-links">
         <a class="nav-link active" href="#home" data-nav="home"><span>▦</span> Discover food</a>
         <a class="nav-link" href="#orders" data-nav="orders"><span>◷</span> My orders <i id="nav-order-count">1</i></a>
@@ -23,37 +36,259 @@
         <a class="nav-link" href="#orders" data-nav="orders"><span>▤</span> Order History</a>
         <a class="nav-link" href="#logout" id="student-logout"><span>⇥</span> Logout</a>
       </nav>
-      <div class="sidebar-bottom"><div class="help-card"><span class="help-icon">✦</span><b>Need a hand?</b><p>Having trouble with an order?</p><a href="#contact" id="contact-cafeteria">Contact Cafeteria ↗</a></div><div class="profile"><div class="avatar" id="sidebar-avatar">ST</div><div><b id="sidebar-user-name">Student</b><small>Student account</small></div><button class="more-btn" id="profile-options" aria-label="Profile options">•••</button></div></div>
+
+      <div class="sidebar-bottom">
+        <div class="help-card">
+          <span class="help-icon">✦</span>
+          <b>Need a hand?</b>
+          <p>Having trouble with an order?</p>
+          <a href="#contact" id="contact-cafeteria">Contact Cafeteria ↗</a>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" id="sidebar-avatar">ST</div>
+          <div><b id="sidebar-user-name">Student</b><small>Student account</small></div>
+          <button class="more-btn" id="profile-options" aria-label="Profile options">•••</button>
+        </div>
+      </div>
     </aside>
 
     <main class="main-content" id="home">
-      <header class="topbar"><button class="mobile-menu" id="mobile-menu" aria-label="Open menu">☰</button><div class="breadcrumb">Student portal <span>/</span> <b id="breadcrumb-current">Discover food</b></div><div class="top-actions"><span class="open-status"><i></i> Cafeteria open</span><button class="cart-button" id="cart-open"><span>▣</span> Cart <b id="cart-count">0</b></button></div></header>
-      <section class="welcome-row"><div><p class="eyebrow">YOUR CAMPUS, YOUR CRAVINGS</p><h1>Hungry? <span>QRunch!</span></h1><p class="subheading">Good food, less waiting. Order now and pick it up when you're ready.</p></div><div class="welcome-art" aria-hidden="true"><span class="art-spark spark-one">✦</span><span class="art-spark spark-two">✳</span><div class="art-plate"><div class="art-food">🥪</div></div><span class="art-leaf">〰</span></div></section>
-      <section class="quick-info"><div class="info-icon orange">◷</div><div><b>Skip the queue</b><small>Order ahead, collect at the counter.</small></div><span class="info-divider"></span><div class="info-icon green">✓</div><div><b>Simple pickup</b><small>Show your pickup code to collect.</small></div><span class="info-divider"></span><div class="info-icon purple">₹</div><div><b>Student-friendly</b><small>Quick bites for every break.</small></div></section>
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Open menu">☰</button>
+        <div class="breadcrumb">Student portal <span>/</span> <b id="breadcrumb-current">Discover food</b></div>
+        <div class="top-actions">
+          <span class="open-status"><i></i> Cafeteria open</span>
+          <button class="cart-button" id="cart-open"><span>▣</span> Cart <b id="cart-count">0</b></button>
+        </div>
+      </header>
 
-      <section class="menu-section" id="discover-section">
-        <div class="section-heading"><div><p class="eyebrow">MADE FRESH ON CAMPUS</p><h2>What's on the menu?</h2><p class="muted">Find your next favourite.</p></div><div class="search-box"><span>⌕</span><input id="search-input" type="search" placeholder="Search dishes..." aria-label="Search dishes" /><kbd>⌘ K</kbd></div></div>
-        <div class="category-row" id="category-row"><button class="category-chip active" data-category="All">✨ All items <span>8</span></button><button class="category-chip" data-category="Meals">🍱 Meals</button><button class="category-chip" data-category="Snacks">🥪 Snacks</button><button class="category-chip" data-category="Drinks">🥤 Drinks</button><button class="category-chip" data-category="Healthy">🥗 Healthy</button></div>
-        <div class="menu-grid" id="menu-grid"></div>
-        <div class="empty-state hidden" id="empty-state"><div>🥣</div><h3>No dishes found</h3><p>Try another search or category.</p><button class="secondary-btn" id="clear-search">Clear filters</button></div>
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow">YOUR CAMPUS, YOUR CRAVINGS</p>
+          <h1>Hungry? <span>QRunch!</span></h1>
+          <p class="subheading">Good food, less waiting. Order now and pick it up when you're ready.</p>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <span class="art-spark spark-one">✦</span>
+          <span class="art-spark spark-two">✳</span>
+          <div class="art-plate"><div class="art-food">🥪</div></div>
+          <span class="art-leaf">〰</span>
+        </div>
       </section>
 
-      <section class="orders-section hidden" id="orders-section"><div class="section-heading"><div><p class="eyebrow">YOUR RECENT ACTIVITY</p><h2>My orders</h2><p class="muted">Keep an eye on your campus cravings.</p></div><button class="secondary-btn" id="back-to-menu">＋ Order something</button></div><div id="order-history" class="order-history"></div></section>
-      <section class="orders-section hidden" id="profile-section"><div class="section-heading"><div><p class="eyebrow">YOUR ACCOUNT</p><h2>My profile</h2><p class="muted">Your account details and quick actions.</p></div></div><div class="profile-panel"><div class="profile-panel-avatar" id="profile-avatar">ST</div><div class="profile-panel-details"><h3 id="profile-name">Student</h3><p id="profile-email">student@example.com</p><p id="profile-id">Customer ID: —</p></div><button class="secondary-btn" id="profile-logout">Logout</button></div><div class="profile-actions"><button class="secondary-btn" id="profile-orders">View order history</button><button class="secondary-btn" id="profile-contact">Contact cafeteria</button></div></section>
-      <section class="orders-section hidden" id="favorites-section"><div class="section-heading"><div><p class="eyebrow">SAVED FOR LATER</p><h2>Your favorites</h2><p class="muted">Your go-to bites, all in one place.</p></div></div><div id="favorite-grid" class="menu-grid"></div><div class="empty-state" id="favorites-empty"><div>♡</div><h3>No favorites yet</h3><p>Tap the heart on any dish to save it here.</p><button class="secondary-btn" id="browse-food">Explore menu</button></div></section>
-      <footer class="footer"><span>© 2026 QRunch</span><span>Made for campus life <b>♥</b></span><span>☎ +91 98765 43210 · Mon–Sat · 8:00 AM–8:00 PM · Main Block</span></footer>
+      <section class="quick-info">
+        <div class="info-icon orange">◷</div>
+        <div><b>Skip the queue</b><small>Order ahead, collect at the counter.</small></div>
+        <span class="info-divider"></span>
+        <div class="info-icon green">✓</div>
+        <div><b>Simple pickup</b><small>Show your pickup code to collect.</small></div>
+        <span class="info-divider"></span>
+        <div class="info-icon purple">₹</div>
+        <div><b>Student-friendly</b><small>Quick bites for every break.</small></div>
+      </section>
+
+      <section class="menu-section" id="discover-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MADE FRESH ON CAMPUS</p>
+            <h2>What's on the menu?</h2>
+            <p class="muted">Find your next favourite.</p>
+          </div>
+          <div class="search-box">
+            <span>⌕</span>
+            <input id="search-input" type="search" placeholder="Search dishes..." aria-label="Search dishes" />
+            <kbd>⌘ K</kbd>
+          </div>
+        </div>
+
+        <div class="category-row" id="category-row">
+          <button class="category-chip active" data-category="All">✨ All items <span>8</span></button>
+          <button class="category-chip" data-category="Meals">🍱 Meals</button>
+          <button class="category-chip" data-category="Snacks">🥪 Snacks</button>
+          <button class="category-chip" data-category="Drinks">🥤 Drinks</button>
+          <button class="category-chip" data-category="Healthy">🥗 Healthy</button>
+        </div>
+
+        <div class="menu-grid" id="menu-grid"></div>
+
+        <div class="empty-state hidden" id="empty-state">
+          <div>🥣</div>
+          <h3>No dishes found</h3>
+          <p>Try another search or category.</p>
+          <button class="secondary-btn" id="clear-search">Clear filters</button>
+        </div>
+      </section>
+
+      <section class="orders-section hidden" id="orders-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR RECENT ACTIVITY</p>
+            <h2>My orders</h2>
+            <p class="muted">Keep an eye on your campus cravings.</p>
+          </div>
+          <button class="secondary-btn" id="back-to-menu">＋ Order something</button>
+        </div>
+        <div id="order-history" class="order-history"></div>
+      </section>
+
+      <section class="orders-section hidden" id="profile-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR ACCOUNT</p>
+            <h2>My profile</h2>
+            <p class="muted">Your account details and quick actions.</p>
+          </div>
+        </div>
+        <div class="profile-panel">
+          <div class="profile-panel-avatar" id="profile-avatar">ST</div>
+          <div class="profile-panel-details">
+            <h3 id="profile-name">Student</h3>
+            <p id="profile-email">student@example.com</p>
+            <p id="profile-id">Customer ID: —</p>
+          </div>
+          <button class="secondary-btn" id="profile-logout">Logout</button>
+        </div>
+        <div class="profile-actions">
+          <button class="secondary-btn" id="profile-orders">View order history</button>
+          <button class="secondary-btn" id="profile-contact">Contact cafeteria</button>
+        </div>
+      </section>
+
+      <section class="orders-section hidden" id="favorites-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">SAVED FOR LATER</p>
+            <h2>Your favorites</h2>
+            <p class="muted">Your go-to bites, all in one place.</p>
+          </div>
+        </div>
+        <div id="favorite-grid" class="menu-grid"></div>
+        <div class="empty-state" id="favorites-empty">
+          <div>♡</div>
+          <h3>No favorites yet</h3>
+          <p>Tap the heart on any dish to save it here.</p>
+          <button class="secondary-btn" id="browse-food">Explore menu</button>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>© 2026 QRunch</span>
+        <span>Made for campus life <b>♥</b></span>
+        <span>☎ +91 98765 43210 · Mon–Sat · 8:00 AM–8:00 PM · Main Block</span>
+      </footer>
     </main>
   </div>
 
+  <!-- Floating cart confirmation -->
   <div class="floating-cart-bar hidden" id="floating-cart-bar" aria-live="polite">
-    <div class="floating-cart-info"><span class="floating-cart-pill" id="floating-cart-count">0 items</span><span>Total: <strong id="floating-cart-total">₹0</strong></span></div>
+    <div class="floating-cart-info">
+      <span class="floating-cart-pill" id="floating-cart-count">0 items</span>
+      <span>Total: <strong id="floating-cart-total">₹0</strong></span>
+    </div>
     <button class="primary-btn" id="floating-confirm-order">Confirm Order <span>→</span></button>
   </div>
-  <div class="overlay hidden" id="overlay"></div>
-  <aside class="cart-drawer" id="cart-drawer" aria-label="Your cart" aria-hidden="true"><div class="drawer-header"><div><p class="eyebrow">READY WHEN YOU ARE</p><h2>Your cart <span id="drawer-item-count">(0)</span></h2></div><button class="icon-btn" id="cart-close" aria-label="Close cart">×</button></div><div class="cart-items" id="cart-items"></div><div class="cart-empty" id="cart-empty"><div>🛍️</div><h3>Your cart is taking a break</h3><p>Add something delicious from the menu.</p></div><div class="cart-footer hidden" id="cart-footer"><div class="total-row"><span>Subtotal</span><b id="cart-subtotal">₹0</b></div><div class="total-row small-total"><span>Pickup fee</span><span>Free</span></div><div class="total-row grand-total"><span>Total</span><b id="cart-total">₹0</b></div><button class="primary-btn full-btn" id="checkout-btn">Place order <span>→</span></button><p class="secure-note">✓ No online payment in this demo</p></div></aside>
 
-  <div class="modal-backdrop hidden" id="success-modal"><div class="success-modal"><button class="icon-btn modal-close" id="success-close" aria-label="Close">×</button><div class="success-check">✓</div><p class="eyebrow">ORDER PLACED</p><h2>You're all set!</h2><p class="muted">Your order has been sent to the cafeteria demo.</p><div class="pickup-ticket"><span>PICKUP CODE</span><strong id="pickup-code">QR-0000</strong><small>Show this code at the pickup counter.</small><div id="pickup-qr" style="display:flex;justify-content:center;margin-top:12px"></div></div><div class="success-summary" id="success-summary"></div><p class="cancel-timer-note" id="cancel-timer-note">You can cancel while the order is New · <strong id="cancel-countdown">10:00</strong> left</p><button class="cancel-order-btn success-cancel-btn" id="success-cancel-order">Cancel order</button><button class="primary-btn full-btn" id="view-orders">Track my order <span>→</span></button></div></div>
-  <div class="modal-backdrop hidden" id="contact-modal"><div class="success-modal contact-modal"><button class="icon-btn modal-close" id="contact-close" aria-label="Close">×</button><div class="success-check">☎</div><p class="eyebrow">WE ARE HERE TO HELP</p><h2>Contact Cafeteria</h2><div class="contact-details"><p><b>Phone</b><a href="tel:+919876543210">+91 98765 43210</a></p><p><b>Working days</b><span>Monday – Saturday</span></p><p><b>Timings</b><span>8:00 AM – 8:00 PM</span></p><p><b>Location</b><span>Campus Cafeteria, Main Block</span></p></div><button class="primary-btn full-btn" id="contact-done">Done</button></div></div><div class="toast" id="toast" role="status"></div>
+  <div class="overlay hidden" id="overlay"></div>
+
+  <!-- Cart drawer -->
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Your cart" aria-hidden="true">
+    <div class="drawer-header">
+      <div>
+        <p class="eyebrow">READY WHEN YOU ARE</p>
+        <h2>Your cart <span id="drawer-item-count">(0)</span></h2>
+      </div>
+      <button class="icon-btn" id="cart-close" aria-label="Close cart">×</button>
+    </div>
+
+    <div class="cart-items" id="cart-items"></div>
+
+    <div class="cart-empty" id="cart-empty">
+      <div>🛍️</div>
+      <h3>Your cart is taking a break</h3>
+      <p>Add something delicious from the menu.</p>
+    </div>
+
+    <div class="cart-footer hidden" id="cart-footer">
+      <div class="total-row"><span>Subtotal</span><b id="cart-subtotal">₹0</b></div>
+      <div class="total-row small-total"><span>Pickup fee</span><span>Free</span></div>
+      <div class="total-row grand-total"><span>Total</span><b id="cart-total">₹0</b></div>
+      <button class="primary-btn full-btn" id="checkout-btn">Place order <span>→</span></button>
+      <p class="secure-note">✓ No online payment in this demo</p>
+    </div>
+  </aside>
+
+  <!-- NEW: Pickup slot selection modal -->
+  <div class="modal-backdrop hidden" id="pickup-slot-modal" role="dialog" aria-modal="true" aria-labelledby="pickup-slot-title">
+    <div class="success-modal pickup-slot-modal-content">
+      <button class="icon-btn modal-close" id="pickup-slot-close" aria-label="Close pickup slot selection">×</button>
+
+      <div class="success-check">◷</div>
+      <p class="eyebrow">CHOOSE YOUR PICKUP TIME</p>
+      <h2 id="pickup-slot-title">Select a pickup slot</h2>
+      <p class="muted">Choose a slot before confirming your order.</p>
+      <p class="muted">Each slot can accept up to 10 orders.</p>
+
+      <div id="pickup-slot-options" class="pickup-slot-options">
+        <p class="muted">Loading available slots...</p>
+      </div>
+
+      <p id="pickup-slot-error" class="pickup-slot-error" role="alert" aria-live="polite"></p>
+
+      <button class="primary-btn full-btn" id="confirm-slot-order" disabled>
+        Confirm pickup slot <span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Order success modal -->
+  <div class="modal-backdrop hidden" id="success-modal">
+    <div class="success-modal">
+      <button class="icon-btn modal-close" id="success-close" aria-label="Close">×</button>
+      <div class="success-check">✓</div>
+      <p class="eyebrow">ORDER PLACED</p>
+      <h2>You're all set!</h2>
+      <p class="muted">Your order has been sent to the cafeteria demo.</p>
+
+      <div class="pickup-ticket">
+        <span>PICKUP CODE</span>
+        <strong id="pickup-code">QR-0000</strong>
+        <small>Show this code at the pickup counter.</small>
+        <div id="pickup-qr" style="display:flex;justify-content:center;margin-top:12px"></div>
+      </div>
+
+      <div class="success-summary" id="success-summary"></div>
+
+      <p class="cancel-timer-note" id="cancel-timer-note">
+        You can cancel while the order is New · <strong id="cancel-countdown">10:00</strong> left
+      </p>
+
+      <button class="cancel-order-btn success-cancel-btn" id="success-cancel-order">Cancel order</button>
+      <button class="primary-btn full-btn" id="view-orders">Track my order <span>→</span></button>
+    </div>
+  </div>
+
+  <!-- Contact modal -->
+  <div class="modal-backdrop hidden" id="contact-modal">
+    <div class="success-modal contact-modal">
+      <button class="icon-btn modal-close" id="contact-close" aria-label="Close">×</button>
+      <div class="success-check">☎</div>
+      <p class="eyebrow">WE ARE HERE TO HELP</p>
+      <h2>Contact Cafeteria</h2>
+
+      <div class="contact-details">
+        <p><b>Phone</b><a href="tel:+919876543210">+91 98765 43210</a></p>
+        <p><b>Working days</b><span>Monday – Saturday</span></p>
+        <p><b>Timings</b><span>8:00 AM – 8:00 PM</span></p>
+        <p><b>Location</b><span>Campus Cafeteria, Main Block</span></p>
+      </div>
+
+      <button class="primary-btn full-btn" id="contact-done">Done</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="/common.js"></script>
   <script src="student.js"></script>
