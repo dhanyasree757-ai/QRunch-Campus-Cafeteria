@@ -75,15 +75,7 @@ document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',St
 (async()=>{try{await QR_API.signIn('vendor');await loadOrders();}catch(err){alert(err.message||'Vendor sign-in failed.');}})();
 
 ```javascript
-$('vendorLogout')?.addEventListener('click', async () => {
-  try {
-    if (typeof QR_API.signOut === 'function') {
-      await QR_API.signOut();
-    }
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-
-  window.location.replace('/index.html');
+$('vendorLogout')?.addEventListener('click', () => {
+  QR_API.signOut();
 });
 ```
