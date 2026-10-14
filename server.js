@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS orders (
  status TEXT NOT NULL DEFAULT 'New' CHECK(status IN ('New','Preparing','Ready','Collected','Rejected','Cancelled')),
  pickup_code TEXT NOT NULL UNIQUE,
  pickup_time TEXT NOT NULL,
+ pickup_slot_key TEXT,
  total INTEGER NOT NULL CHECK(total >= 0),
  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -57,7 +58,12 @@ CREATE TABLE IF NOT EXISTS order_items (
  quantity INTEGER NOT NULL CHECK(quantity > 0)
 );
 `);
+// Add pickup_slot_key to existing databases safely.
+const orderColumns = db.prepare('PRAGMA table_info(orders)').all();
 
+if (!orderColumns.some(column => column.name === 'pickup_slot_key')) {
+  db.exec('ALTER TABLE orders ADD COLUMN pickup_slot_key TEXT');
+}
 const menuSeed = [
  [1,'Paneer Rice Bowl','Meals','Soft paneer, rice & a flavourful masala',85,'🍛','STUDENT FAV'],
  [2,'Veg Cheese Sandwich','Snacks','Toasted bread, veggies & melted cheese',55,'🥪','BESTSELLER'],
@@ -99,6 +105,42 @@ function auth(requiredRole) {
  };
 }
 function makeToken(user) { return jwt.sign({ id:user.id, name:user.name, email:user.email, role:user.role }, JWT_SECRET, { expiresIn:'8h' }); }
+// Pickup slot configuration
+const PICKUP_SLOT_CAPACITY = 10;
+const PICKUP_SLOT_LENGTH_MS = 10 * 60 * 1000;
+
+function getPickupSlots() {
+  const now = Date.now();
+
+  const firstSlot =
+    Math.ceil(now / PICKUP_SLOT_LENGTH_MS) * PICKUP_SLOT_LENGTH_MS;
+
+  const countSlot = db.prepare(`
+    SELECT COUNT(*) AS count
+    FROM orders
+    WHERE pickup_slot_key = ?
+      AND status IN ('New', 'Preparing', 'Ready')
+  `);
+
+  return [10, 20, 30].map((minutes, index) => {
+    const timestamp = firstSlot + index * PICKUP_SLOT_LENGTH_MS;
+    const slotKey = new Date(timestamp).toISOString();
+    const count = countSlot.get(slotKey).count;
+
+    return {
+      slotKey,
+      minutes,
+      pickupTime: new Date(timestamp).toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+      }),
+      remaining: Math.max(0, PICKUP_SLOT_CAPACITY - count),
+      available: count < PICKUP_SLOT_CAPACITY
+    };
+  });
+}
 function formatOrder(id) {
  const o = db.prepare('SELECT * FROM orders WHERE id=?').get(id);
  if (!o) return null;
