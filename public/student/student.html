@@ -12,6 +12,37 @@
 
   <link rel="stylesheet" href="student.css" />
 </head>
+  <div class="modal-backdrop hidden" id="pickup-slot-modal"
+     role="dialog" aria-modal="true"
+     aria-labelledby="pickup-slot-title">
+  <div class="success-modal pickup-slot-modal-content">
+
+    <button class="icon-btn modal-close"
+            id="pickup-slot-close"
+            aria-label="Close pickup slot selection">×</button>
+
+    <div class="success-check">◷</div>
+
+    <p class="eyebrow">CHOOSE YOUR PICKUP TIME</p>
+    <h2 id="pickup-slot-title">Select a pickup slot</h2>
+
+    <p class="muted">Choose a slot before confirming your order.</p>
+    <p class="muted">Each slot can accept up to 10 orders.</p>
+
+    <div id="pickup-slot-options" class="pickup-slot-options">
+      <p class="muted">Loading available slots...</p>
+    </div>
+
+    <p id="pickup-slot-error" class="pickup-slot-error"
+       role="alert" aria-live="polite"></p>
+
+    <button class="primary-btn full-btn"
+            id="confirm-slot-order" disabled>
+      Confirm pickup slot <span>→</span>
+    </button>
+
+  </div>
+</div>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
