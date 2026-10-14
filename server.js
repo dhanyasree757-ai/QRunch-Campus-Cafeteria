@@ -144,8 +144,29 @@ function getPickupSlots() {
 function formatOrder(id) {
  const o = db.prepare('SELECT * FROM orders WHERE id=?').get(id);
  if (!o) return null;
- const items = db.prepare('SELECT menu_item_id AS id, item_name AS name, unit_price AS price, quantity AS qty FROM order_items WHERE order_id=?').all(id);
- return { id:o.public_id, student:o.student_name, studentId:o.student_id, code:o.pickup_code, items, total:o.total, status:o.status, pickupTime:o.pickup_time, createdAt:o.created_at };
+
+ const items = db.prepare(`
+  SELECT
+   menu_item_id AS id,
+   item_name AS name,
+   unit_price AS price,
+   quantity AS qty
+  FROM order_items
+  WHERE order_id=?
+ `).all(id);
+
+ return {
+  id: o.public_id,
+  student: o.student_name,
+  studentId: o.student_id,
+  code: o.pickup_code,
+  items,
+  total: o.total,
+  status: o.status,
+  pickupTime: o.pickup_time,
+  pickupSlotKey: o.pickup_slot_key,
+  createdAt: o.created_at
+ };
 }
 
 app.get('/api/health', (req,res) => res.json({ ok:true, service:'QRunch API', database:'SQLite' }));
@@ -166,7 +187,9 @@ app.post('/api/auth/login', (req,res) => {
  res.json({ token:makeToken(user), user:{ id:user.id,name:user.name,email:user.email,role:user.role,studentId:user.student_id || null } });
 });
 app.get('/api/auth/me', auth(), (req,res) => res.json({ user:req.user }));
-
+app.get('/api/pickup-slots', auth('student'), (req, res) => {
+ res.json({ slots: getPickupSlots() });
+});
 app.get('/api/menu', (req,res) => {
  const rows = db.prepare('SELECT id,name,category,description,price,emoji,badge,available FROM menu_items ORDER BY id').all();
  res.json({ items:rows.map(x=>({...x,available:Boolean(x.available),rating:'4.8'})) });
