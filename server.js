@@ -211,4 +211,7 @@ app.use('/vendor', express.static(path.join(__dirname,'public/vendor')));
 app.get('/', (req,res) => res.sendFile(path.join(__dirname,'index.html')));
 app.get('/auth', (req,res) => res.sendFile(path.join(__dirname,'public/auth.html')));
 app.use((err,req,res,next)=>{ console.error(err); res.status(500).json({ error:'Unexpected server error.' }); });
+app.get('/auth.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'auth.html'));
+});
 app.listen(PORT,()=>console.log(`QRunch server running at http://localhost:${PORT}`));
