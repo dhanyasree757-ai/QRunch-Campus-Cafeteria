@@ -56,3 +56,18 @@ $('pickupForm').addEventListener('submit',async e=>{
 $('resetButton').addEventListener('click',()=>alert('Demo reset is disabled for database-backed orders. Orders are stored in SQLite.'));
 document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.status==='All')));
 (async()=>{try{await QR_API.signIn('vendor');await loadOrders();}catch(err){alert(err.message||'Vendor sign-in failed.');}})();
+```javascript
+document.getElementById('vendorLogout')?.addEventListener('click', async () => {
+  try {
+    if (window.QR_API && typeof window.QR_API.signOut === 'function') {
+      await window.QR_API.signOut();
+    } else if (window.QR_API && typeof window.QR_API.logout === 'function') {
+      await window.QR_API.logout();
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+
+  window.location.href = '/';
+});
+```
