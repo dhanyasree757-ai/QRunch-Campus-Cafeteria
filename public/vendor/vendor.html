@@ -15,7 +15,21 @@
     <div class="sidebar-bottom">Campus Cafeteria</div>
   </aside>
   <main id="dashboard">
-    <header class="topbar"><div><h1>Order Dashboard</h1><p class="muted">Manage orders and student pickups.</p></div><span class="open-label">● Accepting orders</span></header>
+    ```html
+<header class="topbar">
+  <div>
+    <h1>Order Dashboard</h1>
+    <p class="muted">Manage orders and student pickups.</p>
+  </div>
+
+  <div class="topbar-actions">
+    <span class="open-label">● Accepting orders</span>
+    <button type="button" id="vendorLogout" class="logout-button">
+      Logout
+    </button>
+  </div>
+</header>
+```
     <section class="stats" aria-label="Order summary">
       <article class="stat"><span>New</span><strong id="newCount">0</strong></article>
       <article class="stat"><span>Preparing</span><strong id="preparingCount">0</strong></article>
