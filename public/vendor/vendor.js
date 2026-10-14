@@ -74,8 +74,14 @@ $('resetButton').addEventListener('click',()=>alert('Demo reset is disabled for 
 document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.status==='All')));
 (async()=>{try{await QR_API.signIn('vendor');await loadOrders();}catch(err){alert(err.message||'Vendor sign-in failed.');}})();
 
-document.getElementById('vendorLogout')?.addEventListener('click', () => {
-  localStorage.removeItem('qrunch_token');
-  localStorage.removeItem('qrunch_user');
-  window.location.href = '/';
-});
+
+const logoutButton = document.getElementById('vendorLogout');
+
+if (logoutButton) {
+  logoutButton.addEventListener('click', () => {
+    localStorage.removeItem('qrunch_token');
+    localStorage.removeItem('qrunch_user');
+    window.location.href = '/';
+  });
+}
+
