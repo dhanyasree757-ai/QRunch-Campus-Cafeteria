@@ -1,4 +1,4 @@
-```javascript
+
 const QR_API = {
   tokenKey: 'qrunch_token',
   userKey: 'qrunch_user',
