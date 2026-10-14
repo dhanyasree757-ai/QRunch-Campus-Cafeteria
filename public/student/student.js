@@ -276,28 +276,86 @@ function renderOrders() {
     `;
 }
 
+
 /* ---------------- PICKUP SLOT FEATURES ---------------- */
+
+function ensurePickupSlotModal() {
+  // If the modal is missing from student.html, create it here.
+  if (!$('pickup-slot-modal')) {
+    const modal = document.createElement('div');
+    modal.id = 'pickup-slot-modal';
+    modal.className = 'hidden';
+    modal.innerHTML = `
+      <div class="pickup-slot-backdrop"></div>
+      <section class="pickup-slot-dialog" role="dialog"
+        aria-modal="true" aria-labelledby="pickup-slot-heading">
+        <button type="button" id="pickup-slot-close"
+          class="pickup-slot-close" aria-label="Close">✕</button>
+        <h2 id="pickup-slot-heading">Choose pickup time</h2>
+        <p>Select an available pickup slot for your order.</p>
+        <div id="pickup-slot-options"></div>
+        <p id="pickup-slot-error" role="alert"></p>
+        <button type="button" id="confirm-slot-order"
+          class="primary-btn full-btn" disabled>
+          Confirm order
+        </button>
+      </section>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  // Ensure required modal elements exist even if the HTML is incomplete.
+  const modal = $('pickup-slot-modal');
+
+  if (!$('pickup-slot-options')) {
+    const options = document.createElement('div');
+    options.id = 'pickup-slot-options';
+    modal.appendChild(options);
+  }
+
+  if (!$('pickup-slot-error')) {
+    const error = document.createElement('p');
+    error.id = 'pickup-slot-error';
+    error.setAttribute('role', 'alert');
+    modal.appendChild(error);
+  }
+
+  if (!$('confirm-slot-order')) {
+    const button = document.createElement('button');
+    button.id = 'confirm-slot-order';
+    button.type = 'button';
+    button.textContent = 'Confirm order';
+    button.disabled = true;
+    modal.appendChild(button);
+  }
+
+  if (!$('pickup-slot-close')) {
+    const button = document.createElement('button');
+    button.id = 'pickup-slot-close';
+    button.type = 'button';
+    button.textContent = 'Close';
+    modal.appendChild(button);
+  }
+}
+
+ensurePickupSlotModal();
 
 function renderPickupSlots() {
   const container = $('pickup-slot-options');
-  if (!container) return;
+  const confirmButton = $('confirm-slot-order');
+
+  if (!container || !confirmButton) return;
 
   if (!pickupSlots.length) {
     container.innerHTML =
-      '<p class="muted">No pickup slots available. Please try again.</p>';
-
-    $('confirm-slot-order').disabled = true;
+      '<p class="muted">No pickup slots returned. Please refresh and try again.</p>';
+    confirmButton.disabled = true;
     return;
   }
 
   container.innerHTML = pickupSlots.map((slot, index) => {
     const unavailable = !slot.available;
     const selected = selectedPickupSlotKey === slot.slotKey;
-
-    const label = slot.pickupTime || `${slot.minutes} minutes from now`;
-    const capacityText = unavailable
-      ? 'UNAVAILABLE · Slot full'
-      : `${slot.remaining} places left`;
 
     return `
       <button type="button"
@@ -306,27 +364,37 @@ function renderPickupSlots() {
         ${unavailable ? 'disabled aria-disabled="true"' : ''}
         aria-pressed="${selected}">
         <span>
-          <strong>${safeText(label)}</strong>
-          <small>${slot.minutes} min option · ${safeText(capacityText)}</small>
+          <strong>${safeText(slot.pickupTime || `${slot.minutes} minutes`)}</strong>
+          <small>${slot.minutes} min option · ${
+            unavailable ? 'SLOT FULL' : `${slot.remaining} places left`
+          }</small>
         </span>
       </button>
     `;
   }).join('');
 
-  $('confirm-slot-order').disabled = !selectedPickupSlotKey;
+  confirmButton.disabled = !pickupSlots.some(
+    slot => slot.slotKey === selectedPickupSlotKey && slot.available
+  );
 }
 
 async function loadPickupSlots() {
-  $('pickup-slot-options').innerHTML =
-    '<p class="muted">Loading available slots...</p>';
+  const container = $('pickup-slot-options');
+  const confirmButton = $('confirm-slot-order');
 
-  $('confirm-slot-order').disabled = true;
+  container.innerHTML = '<p class="muted">Loading available pickup slots...</p>';
+  confirmButton.disabled = true;
 
   const result = await QR_API.request('/api/pickup-slots');
-  pickupSlots = Array.isArray(result.slots) ? result.slots : [];
 
-  if (!pickupSlots.some(slot =>
-    slot.slotKey === selectedPickupSlotKey && slot.available
+  if (!result || !Array.isArray(result.slots)) {
+    throw new Error('Invalid pickup slots response from server.');
+  }
+
+  pickupSlots = result.slots;
+
+  if (!pickupSlots.some(
+    slot => slot.slotKey === selectedPickupSlotKey && slot.available
   )) {
     selectedPickupSlotKey = null;
   }
@@ -358,11 +426,9 @@ async function openPickupSlots() {
 
 $('pickup-slot-options').addEventListener('click', event => {
   const button = event.target.closest('[data-slot-index]');
-
   if (!button || button.disabled) return;
 
   const slot = pickupSlots[Number(button.dataset.slotIndex)];
-
   if (!slot || !slot.available) return;
 
   selectedPickupSlotKey = slot.slotKey;
@@ -373,8 +439,26 @@ $('pickup-slot-close').addEventListener('click', () => {
   $('pickup-slot-modal').classList.add('hidden');
 });
 
+$('pickup-slot-modal').addEventListener('click', event => {
+  if (event.target.classList.contains('pickup-slot-backdrop')) {
+    $('pickup-slot-modal').classList.add('hidden');
+  }
+});
+
 $('confirm-slot-order').addEventListener('click', async () => {
   if (!selectedPickupSlotKey) return;
+
+  const selected = pickupSlots.find(
+    slot => slot.slotKey === selectedPickupSlotKey && slot.available
+  );
+
+  if (!selected) {
+    $('pickup-slot-error').textContent =
+      'This slot is no longer available. Please select another slot.';
+    await loadPickupSlots();
+    return;
+  }
+
   await placeOrder(null, selectedPickupSlotKey);
 });
 
