@@ -23,7 +23,24 @@ function renderOrders(){
  $('orderList').innerHTML=filtered.length?filtered.map(o=>{
   const next=nextStatus(o.status);
   const items=(o.items||[]).map(i=>`${escapeHTML(i.name)} × ${i.qty}`).join(', ');
-  return `<article class="order"><div><h3>${escapeHTML(o.id)}</h3><p>${escapeHTML(o.student)} · Pickup code: <strong>${escapeHTML(o.code)}</strong></p><p>${items}</p><p><strong>₹${o.total}</strong></p><span class="status ${o.status.toLowerCase()}">${escapeHTML(o.status)}</span></div><div class="order-actions">${next?`<button data-action="advance" data-id="${escapeHTML(o.id)}">${next==='Preparing'?'Accept & prepare':next==='Ready'?'Mark ready':'Mark collected'}</button>`:'<span class="muted">Order complete</span>'}</div></article>`;
+  const pickupTime = o.pickupTime || o.pickup_time || 'Not specified';
+  ```js
+return `<article class="order">
+  <div>
+    <h3>${escapeHTML(o.id)}</h3>
+    <p>${escapeHTML(o.student)} · Pickup code: <strong>${escapeHTML(o.code)}</strong></p>
+    <p><strong>Pickup Time:</strong> ${escapeHTML(pickupTime)}</p>
+    <p>${items}</p>
+    <p><strong>₹${o.total}</strong></p>
+    <span class="status ${o.status.toLowerCase()}">${escapeHTML(o.status)}</span>
+  </div>
+  <div class="order-actions">
+    ${next
+      ? `<button data-action="advance" data-id="${escapeHTML(o.id)}">${next === 'Preparing' ? 'Accept & prepare' : next === 'Ready' ? 'Mark ready' : 'Mark collected'}</button>`
+      : '<span class="muted">Order complete</span>'}
+  </div>
+</article>`;
+```
  }).join(''):`<div class="empty"><h3>No orders found</h3><p>Orders placed by students will appear here.</p></div>`;
  updateStats();
 }
@@ -56,16 +73,12 @@ $('pickupForm').addEventListener('submit',async e=>{
 $('resetButton').addEventListener('click',()=>alert('Demo reset is disabled for database-backed orders. Orders are stored in SQLite.'));
 document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.status==='All')));
 (async()=>{try{await QR_API.signIn('vendor');await loadOrders();}catch(err){alert(err.message||'Vendor sign-in failed.');}})();
-```javascript
-document.getElementById('vendorLogout')?.addEventListener('click', async () => {
+```js
+$('vendorLogout')?.addEventListener('click', async () => {
   try {
-    if (window.QR_API && typeof window.QR_API.signOut === 'function') {
-      await window.QR_API.signOut();
-    } else if (window.QR_API && typeof window.QR_API.logout === 'function') {
-      await window.QR_API.logout();
-    }
+    await QR_API.signOut();
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error('Logout failed:', error);
   }
 
   window.location.href = '/';
